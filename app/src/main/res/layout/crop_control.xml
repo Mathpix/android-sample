@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.app.mathpix_sample.cropcontrol.CropView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_centerInParent="true"
+    android:layout_width="@dimen/crop_control_width"
+    android:layout_height="@dimen/crop_control_height">
+
+    <com.app.mathpix_sample.cropcontrol.CornerView
+        android:id="@+id/top_left_corner"
+        android:layout_width="@dimen/crop_corner_width"
+        android:layout_height="@dimen/crop_corner_width"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        custom:corner="topleft"
+        />
+
+    <com.app.mathpix_sample.cropcontrol.CornerView
+        android:id="@+id/top_right_corner"
+        android:layout_width="@dimen/crop_corner_width"
+        android:layout_height="@dimen/crop_corner_width"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        custom:corner="topright"/>
+
+    <com.app.mathpix_sample.cropcontrol.CornerView
+        android:id="@+id/bottom_right_corner"
+        android:layout_width="@dimen/crop_corner_width"
+        android:layout_height="@dimen/crop_corner_width"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        custom:corner="bottomright"/>
+
+    <com.app.mathpix_sample.cropcontrol.CornerView
+        android:id="@+id/bottom_left_corner"
+        android:layout_width="@dimen/crop_corner_width"
+        android:layout_height="@dimen/crop_corner_width"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        custom:corner="bottomleft"/>
+
+    <ImageView
+        android:layout_margin="@dimen/crop_corner_width_halved"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/fade_to_white"
+        android:id="@+id/image_view"/>
+
+</com.app.mathpix_sample.cropcontrol.CropView>
