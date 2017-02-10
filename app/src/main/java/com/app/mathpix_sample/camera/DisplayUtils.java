@@ -16,7 +16,6 @@ public class DisplayUtils {
         } else {
             screenResolution.set(display.getWidth(), display.getHeight());
         }
-
         return screenResolution;
     }
 
@@ -24,7 +23,6 @@ public class DisplayUtils {
     {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
-
         int orientation = Configuration.ORIENTATION_UNDEFINED;
         if(display.getWidth()==display.getHeight()){
             orientation = Configuration.ORIENTATION_SQUARE;

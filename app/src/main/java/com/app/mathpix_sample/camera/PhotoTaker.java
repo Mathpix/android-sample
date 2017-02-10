@@ -21,7 +21,6 @@ public class PhotoTaker {
     private PhotoTakenListener listener;
     private Bitmap bitmap;
 
-
     public void takePhoto(Camera camera, Context context, final PhotoTakenListener listener) {
         this.listener = listener;
         final String filePath = dateName("jpg", context);
@@ -51,7 +50,6 @@ public class PhotoTaker {
     private class SaveImageTask extends AsyncTask<byte[], Void, Void> {
 
         final String filePath;
-
         private SaveImageTask(String filePath) {
             this.filePath = filePath;
         }
@@ -59,14 +57,12 @@ public class PhotoTaker {
         @Override
         protected Void doInBackground(byte[]... data) {
             FileOutputStream outStream = null;
-
             try {
                 File outFile = new File(filePath);
                 outStream = new FileOutputStream(outFile);
                 outStream.write(data[0]);
                 outStream.flush();
                 outStream.close();
-                Log.i(TAG, "onPictureTaken - wrote bytes: " + data.length + " to " + outFile.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             }

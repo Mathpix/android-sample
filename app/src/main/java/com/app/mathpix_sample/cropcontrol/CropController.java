@@ -20,7 +20,6 @@ public class CropController {
     public CropController(RelativeLayout cropControl, TouchStateListener listener) {
         this.cropControl = cropControl;
         this.listener = listener;
-
         setupCropControl();
     }
 

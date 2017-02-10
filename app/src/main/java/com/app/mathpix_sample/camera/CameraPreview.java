@@ -13,11 +13,9 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-
 import java.util.List;
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
-    private static final String TAG = "CameraPreview";
 
     private Camera mCamera;
     private Handler mAutoFocusHandler;
@@ -83,7 +81,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, e.toString(), e);
+
             }
         }
     }
@@ -92,7 +90,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         try {
             mCamera.autoFocus(autoFocusCB);
         } catch (RuntimeException re) {
-
             scheduleAutoFocus(); // wait 1 sec and then do check again
         }
     }
@@ -106,7 +103,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 mCamera.setOneShotPreviewCallback(null);
                 mCamera.stopPreview();
             } catch(Exception e) {
-                Log.e(TAG, e.toString(), e);
+
             }
         }
     }
@@ -180,7 +177,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         if(mCamera == null) {
             return null;
         }
-
         List<Camera.Size> sizes = mCamera.getParameters().getSupportedPreviewSizes();
         int w = getWidth();
         int h = getHeight();
@@ -189,14 +185,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             h = w;
             w = portraitWidth;
         }
-
         final double ASPECT_TOLERANCE = 0.1;
         double targetRatio = (double) w / h;
         if (sizes == null) return null;
-
         Camera.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
-
         int targetHeight = h;
 
         // Try to find an size match aspect ratio and size
@@ -222,26 +215,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         return optimalSize;
     }
 
-    public void setAutoFocus(boolean state) {
-        if(mCamera != null && mPreviewing) {
-            if(state == mAutoFocus) {
-                return;
-            }
-            mAutoFocus = state;
-            if(mAutoFocus) {
-                if (mSurfaceCreated) { // check if surface created before using autofocus
-                    Log.v(TAG, "Starting autofocus");
-                    safeAutoFocus();
-                } else {
-                    scheduleAutoFocus(); // wait 1 sec and then do check again
-                }
-            } else {
-                Log.v(TAG, "Cancelling autofocus");
-                mCamera.cancelAutoFocus();
-            }
-        }
-    }
-
     private Runnable doAutoFocus = new Runnable() {
         public void run() {
             if(mCamera != null && mPreviewing && mAutoFocus && mSurfaceCreated) {
@@ -250,10 +223,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
     };
 
-    // Mimic continuous auto-focusing
     Camera.AutoFocusCallback autoFocusCB = new Camera.AutoFocusCallback() {
         public void onAutoFocus(boolean success, Camera camera) {
-            scheduleAutoFocus();
+
         }
     };
 

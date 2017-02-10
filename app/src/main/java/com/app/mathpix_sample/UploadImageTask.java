@@ -20,6 +20,12 @@ import java.util.UUID;
 public class UploadImageTask extends AsyncTask<UploadImageTask.UploadParams, Void, UploadImageTask.Result> {
 
     private final ResultListener listener;
+    private static final String FORM_BOUNDARY = "********";
+    private static final String DASHES = "--";
+    private static final String CLRF = "\r\n";
+    private static final String FORM_NAME = "file";
+    private static final String FORM_FILENAME = "image.jpg";
+
     public UploadImageTask(ResultListener listener) {
         this.listener = listener;
     }
@@ -28,13 +34,6 @@ public class UploadImageTask extends AsyncTask<UploadImageTask.UploadParams, Voi
         void onError(String message);
         void onSuccess(String url);
     }
-
-    private static final String FORM_BOUNDARY = "********";
-    private static final String DASHES = "--";
-    private static final String CLRF = "\r\n";
-    private static final String FORM_NAME = "file";
-    private static final String FORM_FILENAME = "image.jpg";
-
 
     public static class UploadParams {
         private Bitmap image;
@@ -61,26 +60,20 @@ public class UploadImageTask extends AsyncTask<UploadImageTask.UploadParams, Voi
 
     @Override
     protected Result doInBackground(UploadParams... arr) {
-
         UploadParams params = arr[0];
-
         Result result;
         try {
             URL url = new URL(Constant.base_Url);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(7000);
             conn.setRequestMethod("POST");
-
             setupAndDoUpload(conn, params);
             String response = getResponse(conn);
             Log.d("Image Upload", response);
-
             JSONObject jsonResponse = new JSONObject(response);
             conn.disconnect();
-
             ResultFailed failed = new ResultFailed();
             failed.message = "Math not found";
-
             if (jsonResponse.has("latex")){
                 String latex = jsonResponse.getString("latex");
                 if (latex.length() > 0){
@@ -131,23 +124,16 @@ public class UploadImageTask extends AsyncTask<UploadImageTask.UploadParams, Voi
     }
 
     private String getResponse(HttpURLConnection conn) throws IOException {
-        InputStream responseStream = new
-                BufferedInputStream(conn.getInputStream());
-
-        BufferedReader responseStreamReader =
-                new BufferedReader(new InputStreamReader(responseStream));
-
+        InputStream responseStream = new BufferedInputStream(conn.getInputStream());
+        BufferedReader responseStreamReader =new BufferedReader(new InputStreamReader(responseStream));
         String line;
         StringBuilder stringBuilder = new StringBuilder();
-
         while ((line = responseStreamReader.readLine()) != null) {
             stringBuilder.append(line).append("\n");
         }
         responseStreamReader.close();
-
         return stringBuilder.toString();
     }
-
 
     @Override
     protected void onPostExecute(Result result) {

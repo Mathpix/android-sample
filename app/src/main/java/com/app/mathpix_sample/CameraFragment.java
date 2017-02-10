@@ -147,10 +147,8 @@ public class CameraFragment extends Fragment {
 
     private void setupPreview(RelativeLayout view) {
         preview = new CameraPreview(getContext(), camera);
-
         cameraLayout = new RelativeLayout(getContext());
         cameraLayout.setGravity(Gravity.CENTER);
-
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT);
@@ -194,7 +192,6 @@ public class CameraFragment extends Fragment {
         Rect cropFrame = new Rect(cropControl.getLeft(), cropControl.getTop(), cropControl.getRight(), cropControl.getBottom());
         int inset = (int) getResources().getDimension(R.dimen.crop_corner_width_halved);
         cropFrame.inset(inset, inset);
-
         int width = getView().getWidth();
         int height = getView().getHeight();
         final CropTransformation transformation = new CropTransformation(
@@ -339,7 +336,6 @@ public class CameraFragment extends Fragment {
         builder.setTitle("Error")
                 .setMessage(message)
                 .setCancelable(true);
-
         AlertDialog alert = builder.create();
         alert.show();
     }
