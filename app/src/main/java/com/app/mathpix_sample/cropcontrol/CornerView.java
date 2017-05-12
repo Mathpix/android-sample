@@ -14,8 +14,7 @@ public class CornerView extends View {
 
     Corner corner;
 
-    public CornerView(Context context, AttributeSet attrs, int defStyle)
-    {
+    public CornerView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         setupLines(context, attrs);
     }
@@ -26,11 +25,11 @@ public class CornerView extends View {
         setupLines(context, attrs);
     }
 
-    public int getOffsetX(){
+    public int getOffsetX() {
         return (int) (getWidth() * corner.centerOffsetX);
     }
 
-    public int getOffsetY(){
+    public int getOffsetY() {
         return (int) (getHeight() * corner.centerOffsetY);
     }
 
@@ -39,7 +38,6 @@ public class CornerView extends View {
                 attrs,
                 R.styleable.CornerView,
                 0, 0);
-
         try {
             corner = Corner.fromInt(a.getInt(R.styleable.CornerView_corner, -10));
 
@@ -48,12 +46,39 @@ public class CornerView extends View {
         }
     }
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        drawLine(canvas, corner.horizontalLine);
+        drawLine(canvas, corner.verticalLine);
+    }
+
+    void drawLine(Canvas canvas, LineDirection line) {
+        int lineWidth = 10;
+        int lineLength = getWidth();
+
+        int centerXOffset = (int) ((line.x * lineWidth) * -0.5f);
+        int centerYOffset = (int) ((line.y * lineWidth) * -0.5f);
+
+        int centerX = (getWidth() / 2) + centerXOffset;
+        int centerY = (getHeight() / 2) + centerYOffset;
+
+        int xPoint = centerX + (line.x * lineLength);
+        int yPoint = centerY + (line.y * lineLength);
+
+        Paint paint = new Paint();
+        paint.setColor(getResources().getColor(R.color.white));
+        paint.setStrokeWidth(lineWidth);
+
+        canvas.drawLine(centerX, centerY, xPoint, yPoint, paint);
+    }
+
     enum Corner {
         TOP_LEFT(LineDirection.DOWN, LineDirection.RIGHT, 1f, 2f),
         TOP_RIGHT(LineDirection.DOWN, LineDirection.LEFT, 1f, 2f),
         BOTTOM_LEFT(LineDirection.UP, LineDirection.RIGHT, 1f, 0f),
         BOTTOM_RIGHT(LineDirection.UP, LineDirection.LEFT, 1f, 0f);
-
         final LineDirection horizontalLine;
         final LineDirection verticalLine;
         final float centerOffsetX;
@@ -67,7 +92,7 @@ public class CornerView extends View {
         }
 
         public static Corner fromInt(int anInt) {
-            switch (anInt){
+            switch (anInt) {
                 case 0:
                     return TOP_LEFT;
                 case 1:
@@ -84,40 +109,12 @@ public class CornerView extends View {
 
     enum LineDirection {
         UP(0, -1), DOWN(0, 1), LEFT(-1, 0), RIGHT(1, 0);
-
         final int x;
         final int y;
-        LineDirection(int x, int y){
+
+        LineDirection(int x, int y) {
             this.x = x;
             this.y = y;
         }
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        drawLine(canvas, corner.horizontalLine);
-        drawLine(canvas, corner.verticalLine);
-    }
-
-    void drawLine(Canvas canvas, LineDirection line){
-        int lineWidth = 10;
-        int lineLength = getWidth();
-
-        int centerXOffset = (int) ((line.x * lineWidth) * -0.5f);
-        int centerYOffset = (int) ((line.y * lineWidth) * -0.5f);
-
-        int centerX = (getWidth() /2) + centerXOffset;
-        int centerY = (getHeight() /2) + centerYOffset;
-
-        int xPoint = centerX + (line.x * lineLength);
-        int yPoint = centerY + (line.y * lineLength);
-
-        Paint paint = new Paint();
-        paint.setColor(getResources().getColor(R.color.white));
-        paint.setStrokeWidth(lineWidth);
-
-        canvas.drawLine(centerX, centerY, xPoint, yPoint, paint);
     }
 }

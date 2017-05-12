@@ -2,6 +2,8 @@
 <com.app.mathpix_sample.cropcontrol.CropView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/crop_control"
+    android:clickable="true"
     android:layout_centerInParent="true"
     android:layout_width="@dimen/crop_control_width"
     android:layout_height="@dimen/crop_control_height">
@@ -41,9 +43,17 @@
 
     <ImageView
         android:layout_margin="@dimen/crop_corner_width_halved"
+        android:background="@drawable/white_border_rect"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/fade_to_white"
         android:id="@+id/image_view"/>
+
+    <View
+        android:id="@+id/view_scan_line"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:layout_alignParentLeft="true"
+        android:background="@color/colorAccent" />
 
 </com.app.mathpix_sample.cropcontrol.CropView>

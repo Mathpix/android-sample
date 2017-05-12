@@ -16,6 +16,10 @@ public class CarmeraActivity extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(!MarshmallowPermissions.checkPermissionForCamera(this)) {
+            MarshmallowPermissions.requestPermissionForCamera(this);
+        }
     }
 
     @Override
