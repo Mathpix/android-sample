@@ -40,7 +40,6 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -73,7 +72,7 @@ public class CameraFragment extends Fragment {
 
     @OnClick(R.id.nextPhoto)
     void onNextPhotoClicked() {
-        if(mWebViewContainer.getVisibility() == View.VISIBLE) {
+        if (mWebViewContainer.getVisibility() == View.VISIBLE) {
             mWebViewContainer.setVisibility(View.INVISIBLE);
 
 
@@ -84,7 +83,7 @@ public class CameraFragment extends Fragment {
 
     @OnClick(R.id.crop_control)
     void onTapCropView() {
-        if(mPreview != null) {
+        if (mPreview != null) {
             try {
                 Log.e(TAG, "Start auto-focusing");
                 mPreview.autoFocus();
@@ -105,8 +104,8 @@ public class CameraFragment extends Fragment {
             public void onPictureTaken(final byte[] data, Camera camera) {
                 stopPreview();
 
-                Bitmap bm= ImageUtil.toBitmap(data);
-                if(bm.getWidth() > bm.getHeight()) {
+                Bitmap bm = ImageUtil.toBitmap(data);
+                if (bm.getWidth() > bm.getHeight()) {
                     bm = ImageUtil.rotate(bm, 90);
                 }
                 Log.e(TAG, "got bitmap size = " + bm.getWidth() + ", " + bm.getHeight());
@@ -208,7 +207,7 @@ public class CameraFragment extends Fragment {
         try {
             mCamera = CameraUtil.getCameraInstance();
 
-            if(mCamera == null) {
+            if (mCamera == null) {
 //                showAlert("Can not connect to camera.");
             } else {
                 mPreview = new CameraPreview(getContext(), mCamera);
@@ -243,8 +242,7 @@ public class CameraFragment extends Fragment {
         startScanAnimation();
 
 
-        UUID deviceUID = MathpixUUID.uuid(getContext());
-        UploadImageTask.UploadParams params = new UploadImageTask.UploadParams(bitmap,deviceUID);
+        UploadImageTask.UploadParams params = new UploadImageTask.UploadParams(bitmap);
         UploadImageTask task = new UploadImageTask(new UploadImageTask.ResultListener() {
             @Override
             public void onError(String message) {
@@ -273,11 +271,12 @@ public class CameraFragment extends Fragment {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                final String js = "javascript:setResultJson(" + mLatestLatex + ")";
+                final String js = "javascript:setLatex('" + mLatestLatex + "')";
                 if (mWebView != null) {
                     mWebView.loadUrl(js);
                 }
             }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 return true;
@@ -296,7 +295,7 @@ public class CameraFragment extends Fragment {
 
     }
 
-    public String localHTML(Context context){
+    public String localHTML(Context context) {
         StringBuilder stringBuilder = new StringBuilder();
         InputStream json;
         try {

@@ -2,60 +2,23 @@ package com.app.mathpix_sample;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import org.json.JSONObject;
+import com.app.mathpix_sample.api.request.SingleProcessRequest;
+import com.app.mathpix_sample.api.response.DetectionResult;
+import com.google.gson.Gson;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.UUID;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
-public class UploadImageTask extends AsyncTask<UploadImageTask.UploadParams, Void, UploadImageTask.Result> {
+class UploadImageTask extends AsyncTask<UploadImageTask.UploadParams, Void, UploadImageTask.Result> {
 
     private final ResultListener listener;
-    private static final String FORM_BOUNDARY = "********";
-    private static final String DASHES = "--";
-    private static final String CLRF = "\r\n";
-    private static final String FORM_NAME = "file";
-    private static final String FORM_FILENAME = "image.jpg";
 
-    public UploadImageTask(ResultListener listener) {
+    UploadImageTask(ResultListener listener) {
         this.listener = listener;
-    }
-
-    interface ResultListener{
-        void onError(String message);
-        void onSuccess(String url);
-    }
-
-    public static class UploadParams {
-        private Bitmap image;
-        private UUID deviceUID;
-
-        public UploadParams(Bitmap image, UUID deviceUID) {
-            this.image = image;
-            this.deviceUID = deviceUID;
-        }
-    }
-
-    public static class Result {
-    }
-
-    public static class ResultSuccessful extends Result {
-        private String resultURL;
-        protected String latex;
-    }
-
-    public static class ResultFailed extends Result {
-        private Exception exception;
-        public String message;
     }
 
     @Override
@@ -63,86 +26,75 @@ public class UploadImageTask extends AsyncTask<UploadImageTask.UploadParams, Voi
         UploadParams params = arr[0];
         Result result;
         try {
-            URL url = new URL(Constant.base_Url);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(7000);
-            conn.setRequestMethod("POST");
-            setupAndDoUpload(conn, params);
-            String response = getResponse(conn);
-            Log.d("Image Upload", response);
-            JSONObject jsonResponse = new JSONObject(response);
-            conn.disconnect();
-            ResultFailed failed = new ResultFailed();
-            failed.message = "Math not found";
-            if (jsonResponse.has("latex")){
-                String latex = jsonResponse.getString("latex");
-                if (latex.length() > 0){
-                    ResultSuccessful successful = new ResultSuccessful();
-                    successful.resultURL = response;
-                    successful.latex = latex;
-                    result = successful;
-                }else{
-                    result = failed;
-                }
-            }else{
-                result = failed;
-            }
+            OkHttpClient client = new OkHttpClient();
+            SingleProcessRequest singleProcessRequest = new SingleProcessRequest(params.image);
+            MediaType JSON = MediaType.parse("application/json");
+            RequestBody requestBody = RequestBody.create(JSON, new Gson().toJson(singleProcessRequest));
 
+            Request request = new Request.Builder()
+                    .url("https://api.mathpix.com/v3/latex")
+                    .addHeader("content-type", "application/json")
+                    .addHeader("app_id", "mathpix")
+                    .addHeader("app_key", "139ee4b61be2e4abcfb1238d9eb99902")
+                    .post(requestBody)
+                    .build();
+            Response response = client.newCall(request).execute();
+            String responseString = response.body().string();
+            DetectionResult detectionResult = new Gson().fromJson(responseString, DetectionResult.class);
+            if (detectionResult != null && detectionResult.latex != null) {
+                result = new ResultSuccessful(detectionResult.latex);
+            } else if (detectionResult != null && detectionResult.error != null) {
+                result = new ResultFailed(detectionResult.error);
+            } else {
+                result = new ResultFailed("Math not found");
+            }
         } catch (Exception e) {
-            ResultFailed failed = new ResultFailed();
-            failed.exception = e;
-            failed.message = "Failed to send to server. Check your connection and try again";
-            result = failed;
+            result = new ResultFailed("Failed to send to server. Check your connection and try again");
         }
         return result;
-    }
-
-    private void setupAndDoUpload(HttpURLConnection conn, UploadParams params) throws IOException {
-        conn.setRequestProperty("DeviceId", params.deviceUID.toString());
-        conn.setRequestProperty("app_id",Constant.app_id);
-        conn.setRequestProperty("app_key",Constant.app_key);
-        String contentType = "multipart/form-data; boundary=" + FORM_BOUNDARY;
-        conn.setRequestProperty("Content-Type", contentType);
-        DataOutputStream body = new DataOutputStream(conn.getOutputStream());
-        body.writeBytes(DASHES + FORM_BOUNDARY + CLRF);
-        String bytes = "Content-Disposition: form-data; name=\"" + FORM_NAME + "\"; filename=\"" +
-                FORM_FILENAME + "\"" + CLRF;
-        body.writeBytes(bytes);
-        body.writeBytes("Content-Type: image/jpeg" + CLRF + CLRF);
-        body.write(bitmapToBytes(params.image));
-        body.writeBytes(CLRF);
-        body.writeBytes(DASHES + FORM_BOUNDARY + DASHES + CLRF);
-        body.flush();
-        body.close();
-    }
-
-    // Convert to JPEG and return byte array
-    private byte[] bitmapToBytes(Bitmap image) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        return baos.toByteArray();
-    }
-
-    private String getResponse(HttpURLConnection conn) throws IOException {
-        InputStream responseStream = new BufferedInputStream(conn.getInputStream());
-        BufferedReader responseStreamReader =new BufferedReader(new InputStreamReader(responseStream));
-        String line;
-        StringBuilder stringBuilder = new StringBuilder();
-        while ((line = responseStreamReader.readLine()) != null) {
-            stringBuilder.append(line).append("\n");
-        }
-        responseStreamReader.close();
-        return stringBuilder.toString();
     }
 
     @Override
     protected void onPostExecute(Result result) {
         if (result instanceof ResultSuccessful) {
             ResultSuccessful successful = (ResultSuccessful) result;
-            listener.onSuccess(successful.resultURL);
+            listener.onSuccess(successful.latex);
         } else if (result instanceof ResultFailed) {
             ResultFailed failed = (ResultFailed) result;
             listener.onError(failed.message);
+        }
+    }
+
+    interface ResultListener {
+        void onError(String message);
+
+        void onSuccess(String url);
+    }
+
+    static class UploadParams {
+        private Bitmap image;
+
+        UploadParams(Bitmap image) {
+            this.image = image;
+        }
+    }
+
+    static class Result {
+    }
+
+    private static class ResultSuccessful extends Result {
+        String latex;
+
+        ResultSuccessful(String latex) {
+            this.latex = latex;
+        }
+    }
+
+    private static class ResultFailed extends Result {
+        String message;
+
+        ResultFailed(String message) {
+            this.message = message;
         }
     }
 }
